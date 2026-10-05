@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% block content %}
+<div class="form-shell"><p class="eyebrow">CUSTOMER-FACING FORM</p><h1>Request a quote</h1><p class="muted">Use this as the embedded form on a contractor, auto shop, cleaner, landscaper, or other service-business website.</p>
+<form method="post" class="card form-card">
+<label>Name<input name="name" required placeholder="Jordan Smith"></label>
+<div class="grid2"><label>Phone<input name="phone" placeholder="(208) 555-0123"></label><label>Email<input type="email" name="email" placeholder="jordan@example.com"></label></div>
+<label>What do you need help with?<input name="service" required placeholder="Water heater replacement"></label>
+<label>Project details<textarea name="details" rows="5" placeholder="Tell us what is happening, what you need, and any timing details..."></textarea></label>
+<label>How soon do you need help?<select name="urgency"><option>ASAP</option><option>This week</option><option selected>This month</option><option>Just researching</option></select></label>
+<button class="button full" type="submit">Request my quote</button>
+</form></div>
+{% endblock %}

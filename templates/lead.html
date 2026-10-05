@@ -1,0 +1,10 @@
+{% extends 'base.html' %}{% block content %}
+<div class="section-head"><div><p class="eyebrow">LEAD #{{ lead.id }}</p><h1>{{ lead.name }}</h1></div><span class="score big {% if lead.score >= 80 %}hot{% elif lead.score >= 60 %}warm{% endif %}">{{ lead.score }}</span></div>
+<div class="grid-main">
+<div>
+<div class="card"><h2>AI qualification</h2><p>{{ lead.ai_summary }}</p><div class="details"><div><span>Service</span><b>{{ lead.service }}</b></div><div><span>Urgency</span><b>{{ lead.urgency }}</b></div><div><span>Phone</span><b>{{ lead.phone or '—' }}</b></div><div><span>Email</span><b>{{ lead.email or '—' }}</b></div></div>{% if lead.details %}<h3>Customer details</h3><p class="quote">{{ lead.details }}</p>{% endif %}</div>
+<div class="card"><h2>Suggested response</h2><form method="post"><textarea name="response_draft" rows="7">{{ lead.response_draft|replace('{first_name}', lead.name.split()[0]) }}</textarea><div class="grid2"><label>Status<select name="status">{% for s in ['New','Contacted','Qualified','Appointment Set','Won','Lost'] %}<option {% if lead.status==s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></label><label>Next follow-up<input type="datetime-local" name="followup_at" value="{{ lead.followup_at[:16] if lead.followup_at else '' }}"></label></div><button class="button" type="submit">Save changes</button></form><form method="post" action="{{ url_for('mark_contacted', lead_id=lead.id) }}" class="inline-form"><button class="button secondary" type="submit">Mark response sent</button></form></div>
+</div>
+<aside><div class="card"><h2>Automation trail</h2>{% for item in activity %}<div class="activity"><strong>{{ item.activity_type }}</strong><span>{{ item.created_at|replace('T',' ') }}</span><p>{{ item.note }}</p></div>{% endfor %}</div><div class="card"><h2>Production integrations</h2><p class="muted small">Connect these after you validate the offer:</p><ul><li>Twilio — SMS & missed-call text</li><li>Gmail/SendGrid — email</li><li>Google Calendar — scheduling</li><li>HubSpot/GoHighLevel — CRM sync</li><li>OpenAI — deeper lead qualification</li></ul></div></aside>
+</div>
+{% endblock %}

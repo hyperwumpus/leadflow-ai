@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% block content %}
+<div class="hero"><div><p class="eyebrow">LOCAL SERVICE BUSINESS AUTOMATION</p><h1>Every lead gets captured, qualified, and followed up.</h1><p class="muted">This demo turns a website inquiry into a scored CRM lead, response draft, and follow-up task automatically.</p></div><a class="button" href="{{ url_for('intake') }}">Test the lead form</a></div>
+<div class="stats">
+  <div class="card stat"><span>Total leads</span><strong>{{ stats.total }}</strong></div>
+  <div class="card stat"><span>New</span><strong>{{ stats.new }}</strong></div>
+  <div class="card stat"><span>Hot</span><strong>{{ stats.hot }}</strong></div>
+  <div class="card stat"><span>Won</span><strong>{{ stats.won }}</strong></div>
+</div>
+{% if due %}<section><h2>Follow-ups due</h2><div class="card"><table><thead><tr><th>Lead</th><th>Service</th><th>Score</th><th>Due</th></tr></thead><tbody>{% for lead in due %}<tr><td><a href="{{ url_for('lead_detail', lead_id=lead.id) }}">{{ lead.name }}</a></td><td>{{ lead.service }}</td><td><span class="score {% if lead.score >= 80 %}hot{% endif %}">{{ lead.score }}</span></td><td>{{ lead.followup_at|replace('T',' ') }}</td></tr>{% endfor %}</tbody></table></div></section>{% endif %}
+<section><div class="section-head"><h2>Lead pipeline</h2><a href="{{ url_for('intake') }}">+ Add lead</a></div><div class="card table-wrap"><table><thead><tr><th>Lead</th><th>Service</th><th>Urgency</th><th>Score</th><th>Status</th><th>Source</th><th>Created</th></tr></thead><tbody>{% for lead in leads %}<tr><td><a href="{{ url_for('lead_detail', lead_id=lead.id) }}"><strong>{{ lead.name }}</strong></a><div class="tiny">{{ lead.phone or lead.email }}</div></td><td>{{ lead.service }}</td><td>{{ lead.urgency }}</td><td><span class="score {% if lead.score >= 80 %}hot{% elif lead.score >= 60 %}warm{% endif %}">{{ lead.score }}</span></td><td><span class="status">{{ lead.status }}</span></td><td>{{ lead.source }}</td><td class="tiny">{{ lead.created_at|replace('T',' ') }}</td></tr>{% else %}<tr><td colspan="7" class="empty">No leads yet. Submit the lead form to watch the automation work.</td></tr>{% endfor %}</tbody></table></div></section>
+{% endblock %}
