@@ -1,0 +1,28 @@
+{# Geometric wolf head mark — the LeadWolf mascot. Include anywhere with:
+   {% include '_wolf.html' %}  (inherits the .wolf-mark class for sizing) #}
+<svg viewBox="0 0 64 64" class="wolf-mark" aria-hidden="true" role="img">
+  <defs>
+    <linearGradient id="wolfGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#00e5ff"/>
+      <stop offset="1" stop-color="#ff2e88"/>
+    </linearGradient>
+  </defs>
+  <!-- ears -->
+  <path d="M11 25 L17 5 L29 19 Z" fill="url(#wolfGrad)"/>
+  <path d="M53 25 L47 5 L35 19 Z" fill="url(#wolfGrad)"/>
+  <!-- skull -->
+  <path d="M11 25 L21 18 L32 13 L43 18 L53 25 L48 41 L39 51 L32 57 L25 51 L16 41 Z"
+        fill="url(#wolfGrad)"/>
+  <!-- low-poly facets -->
+  <path d="M21 18 L32 13 L32 30 L18 28 Z" fill="#0b0714" opacity="0.38"/>
+  <path d="M43 18 L32 13 L32 30 L46 28 Z" fill="#0b0714" opacity="0.28"/>
+  <path d="M18 28 L32 30 L25 51 L16 41 Z" fill="#0b0714" opacity="0.18"/>
+  <path d="M46 28 L32 30 L39 51 L48 41 Z" fill="#0b0714" opacity="0.12"/>
+  <!-- eyes: sharp, forward-facing hunter slits -->
+  <path d="M19 33 L29 30.5 L26.5 37 Z" fill="#0b0714"/>
+  <path d="M45 33 L35 30.5 L37.5 37 Z" fill="#0b0714"/>
+  <!-- muzzle -->
+  <path d="M25 43 L32 39 L39 43 L36 52 L28 52 Z" fill="#0b0714" opacity="0.55"/>
+  <!-- nose -->
+  <path d="M28 45 L36 45 L32 50.5 Z" fill="#0b0714"/>
+</svg>
