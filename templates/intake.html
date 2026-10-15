@@ -1,11 +1,49 @@
-{% extends 'base.html' %}{% block content %}
-<div class="form-shell"><p class="eyebrow">CUSTOMER-FACING FORM</p><h1>Request a quote</h1><p class="muted">Use this as the embedded form on a contractor, auto shop, cleaner, landscaper, or other service-business website.</p>
-<form method="post" class="card form-card">
-<label>Name<input name="name" required placeholder="Jordan Smith"></label>
-<div class="grid2"><label>Phone<input name="phone" placeholder="(208) 555-0123"></label><label>Email<input type="email" name="email" placeholder="jordan@example.com"></label></div>
-<label>What do you need help with?<input name="service" required placeholder="Water heater replacement"></label>
-<label>Project details<textarea name="details" rows="5" placeholder="Tell us what is happening, what you need, and any timing details..."></textarea></label>
-<label>How soon do you need help?<select name="urgency"><option>ASAP</option><option>This week</option><option selected>This month</option><option>Just researching</option></select></label>
-<button class="button full" type="submit">Request my quote</button>
-</form></div>
+{% extends 'base.html' %}
+{% block title %}Request a quote — {{ business_name }}{% endblock %}
+{% block content %}
+
+<div class="intake-hero">
+  {% include '_wolf.html' %}
+  <p class="eyebrow">Request a quote</p>
+  <h1>Get help from <span class="biz-name">{{ business_name }}</span></h1>
+  <p class="muted">Tell us what you need — we'll get back to you fast, usually within the hour.</p>
+</div>
+
+<div class="form-shell">
+  <form method="post" class="card form-card" novalidate>
+    <label>Your name
+      <input name="name" required placeholder="Jordan Smith"
+             value="{{ form.get('name', '') }}" autocomplete="name">
+    </label>
+    <div class="grid2">
+      <label>Phone
+        <input name="phone" placeholder="(208) 555-0123"
+               value="{{ form.get('phone', '') }}" autocomplete="tel">
+      </label>
+      <label>Email
+        <input type="email" name="email" placeholder="jordan@example.com"
+               value="{{ form.get('email', '') }}" autocomplete="email">
+      </label>
+    </div>
+    <label>What do you need help with?
+      <input name="service" required placeholder="Water heater replacement"
+             value="{{ form.get('service', '') }}">
+    </label>
+    <label>Project details
+      <textarea name="details" rows="5"
+                placeholder="Tell us what's happening, what you need, and any timing details...">{{ form.get('details', '') }}</textarea>
+    </label>
+    <label>How soon do you need help?
+      <select name="urgency">
+        {% for u in urgencies %}
+        <option value="{{ u }}" {% if form.get('urgency', 'This month') == u %}selected{% endif %}>{{ u }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button class="button full" type="submit">Request my quote</button>
+    <p class="tiny" style="text-align:center; margin-top:12px;">
+      No spam, no robocalls — just a real response from {{ business_name }}.
+    </p>
+  </form>
+</div>
 {% endblock %}
