@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Settings — {{ app_name }}{% endblock %}
+{% block content %}
+
+<div class="form-shell">
+  <p class="eyebrow">White-label settings</p>
+  <h1>Settings</h1>
+  <p class="muted" style="margin-bottom:20px;">
+    Your business name appears on the customer intake form and inside
+    every auto-generated response draft.
+  </p>
+  <form method="post" class="card form-card">
+    <label>Business name
+      <input name="business_name" required minlength="2" maxlength="80"
+             value="{{ business_name }}" placeholder="Acme Plumbing Co.">
+    </label>
+    <button class="button" type="submit">Save settings</button>
+  </form>
+</div>
+{% endblock %}
