@@ -3,17 +3,40 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ app_name }}</title>
+  <meta name="description" content="LeadWolf — {{ tagline }} Lead capture, qualification, and follow-up for local service businesses.">
+  <title>{% block title %}{{ app_name }} — {{ tagline }}{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 <header class="topbar">
-  <a class="brand" href="{{ url_for('dashboard') }}">{{ app_name }}</a>
-  <nav><a href="{{ url_for('dashboard') }}">Dashboard</a><a href="{{ url_for('intake') }}">Lead Form</a></nav>
+  <div class="topbar-inner">
+    <a class="brand" href="{{ url_for('dashboard') }}" aria-label="{{ app_name }} home">
+      {% include '_wolf.html' %}
+      <span>
+        <span class="brand-word"><span class="lw-lead">LEAD</span><span class="lw-wolf">WOLF</span></span>
+        <span class="brand-tag">{{ tagline }}</span>
+      </span>
+    </a>
+    <nav class="navlinks" aria-label="Main">
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('intake') }}">Lead Form</a>
+      <a href="{{ url_for('export_csv') }}">Export CSV</a>
+      <a href="{{ url_for('settings') }}">Settings</a>
+    </nav>
+  </div>
 </header>
+
 <main class="container">
-  {% with messages = get_flashed_messages() %}{% if messages %}<div class="flash">{{ messages[0] }}</div>{% endif %}{% endwith %}
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for m in messages %}<div class="flash">{{ m }}</div>{% endfor %}
+    {% endif %}
+  {% endwith %}
   {% block content %}{% endblock %}
 </main>
+
+<footer class="footer">
+  <span class="foot-tag">{{ app_name }}</span> · {{ tagline }} · Local-first lead capture
+</footer>
 </body>
 </html>
