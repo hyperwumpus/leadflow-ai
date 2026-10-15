@@ -1,10 +1,110 @@
-{% extends 'base.html' %}{% block content %}
-<div class="section-head"><div><p class="eyebrow">LEAD #{{ lead.id }}</p><h1>{{ lead.name }}</h1></div><span class="score big {% if lead.score >= 80 %}hot{% elif lead.score >= 60 %}warm{% endif %}">{{ lead.score }}</span></div>
-<div class="grid-main">
-<div>
-<div class="card"><h2>AI qualification</h2><p>{{ lead.ai_summary }}</p><div class="details"><div><span>Service</span><b>{{ lead.service }}</b></div><div><span>Urgency</span><b>{{ lead.urgency }}</b></div><div><span>Phone</span><b>{{ lead.phone or '—' }}</b></div><div><span>Email</span><b>{{ lead.email or '—' }}</b></div></div>{% if lead.details %}<h3>Customer details</h3><p class="quote">{{ lead.details }}</p>{% endif %}</div>
-<div class="card"><h2>Suggested response</h2><form method="post"><textarea name="response_draft" rows="7">{{ lead.response_draft|replace('{first_name}', lead.name.split()[0]) }}</textarea><div class="grid2"><label>Status<select name="status">{% for s in ['New','Contacted','Qualified','Appointment Set','Won','Lost'] %}<option {% if lead.status==s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></label><label>Next follow-up<input type="datetime-local" name="followup_at" value="{{ lead.followup_at[:16] if lead.followup_at else '' }}"></label></div><button class="button" type="submit">Save changes</button></form><form method="post" action="{{ url_for('mark_contacted', lead_id=lead.id) }}" class="inline-form"><button class="button secondary" type="submit">Mark response sent</button></form></div>
+{% extends 'base.html' %}
+{% block title %}Lead #{{ lead.id }} — {{ lead.name }}{% endblock %}
+{% block content %}
+
+<div class="section-head">
+  <div>
+    <p class="eyebrow">Lead #{{ lead.id }}</p>
+    <h1>{{ lead.name }}</h1>
+  </div>
+  <span class="score big {% if lead.score >= 80 %}hot{% elif lead.score >= 60 %}warm{% endif %}"
+        title="Lead score out of 100">{{ lead.score }}</span>
 </div>
-<aside><div class="card"><h2>Automation trail</h2>{% for item in activity %}<div class="activity"><strong>{{ item.activity_type }}</strong><span>{{ item.created_at|replace('T',' ') }}</span><p>{{ item.note }}</p></div>{% endfor %}</div><div class="card"><h2>Production integrations</h2><p class="muted small">Connect these after you validate the offer:</p><ul><li>Twilio — SMS & missed-call text</li><li>Gmail/SendGrid — email</li><li>Google Calendar — scheduling</li><li>HubSpot/GoHighLevel — CRM sync</li><li>OpenAI — deeper lead qualification</li></ul></div></aside>
+
+<div class="grid-main">
+  <div>
+    {# ---- Qualification ---- #}
+    <div class="card">
+      <h2>Qualification</h2>
+      <p>{{ lead.ai_summary }}</p>
+      <div class="details">
+        <div><span>Service</span><b>{{ lead.service }}</b></div>
+        <div><span>Urgency</span><b>{{ lead.urgency }}</b></div>
+        <div><span>Phone</span><b>{{ lead.phone or '—' }}</b></div>
+        <div><span>Email</span><b>{{ lead.email or '—' }}</b></div>
+      </div>
+      {% if lead.details %}
+        <h3 style="margin-top:14px">Customer details</h3>
+        <p class="quote">{{ lead.details }}</p>
+      {% endif %}
+
+      {# ---- Transparent score breakdown ---- #}
+      {% if breakdown %}
+      <div class="breakdown">
+        <h3>Why this score</h3>
+        <div class="b-row"><span>Base score</span><span class="pts">+{{ breakdown.base }}</span></div>
+        <div class="b-row"><span>Urgency: {{ breakdown.urgency_label }}</span><span class="pts">+{{ breakdown.urgency_points }}</span></div>
+        <div class="b-row"><span>High-intent keywords ({{ breakdown.keywords_matched|length }})</span><span class="pts">+{{ breakdown.keyword_points }}</span></div>
+        {% if breakdown.keywords_matched %}
+        <div class="kw-tags">
+          {% for kw in breakdown.keywords_matched %}<span>{{ kw }}</span>{% endfor %}
+        </div>
+        {% endif %}
+        <div class="b-row total"><span>Total</span><span class="pts">{{ breakdown.total }}/100 · {{ breakdown.priority }}</span></div>
+      </div>
+      {% endif %}
+    </div>
+
+    {# ---- Response draft ---- #}
+    <div class="card">
+      <h2>Suggested response</h2>
+      <form method="post">
+        <textarea name="response_draft" rows="7">{{ lead.response_draft }}</textarea>
+        <div class="grid2">
+          <label>Status
+            <select name="status">
+              {% for s in statuses %}
+              <option {% if lead.status == s %}selected{% endif %}>{{ s }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label>Next follow-up
+            <input type="datetime-local" name="followup_at"
+                   value="{{ lead.followup_at[:16] if lead.followup_at else '' }}">
+          </label>
+        </div>
+        <div class="action-row">
+          <button class="button" type="submit">Save changes</button>
+        </div>
+      </form>
+      <div class="action-row">
+        <form method="post" action="{{ url_for('mark_contacted', lead_id=lead.id) }}" class="inline-form">
+          <button class="button secondary" type="submit">Mark response sent</button>
+        </form>
+        <form method="post" action="{{ url_for('delete_lead', lead_id=lead.id) }}"
+              onsubmit="return confirm('Delete {{ lead.name }}? This cannot be undone.');"
+              class="inline-form">
+          <button class="button danger" type="submit">Delete lead</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {# ---- Sidebar ---- #}
+  <aside>
+    <div class="card">
+      <h2>Automation trail</h2>
+      {% for item in activity %}
+        <div class="activity">
+          <strong>{{ item.activity_type }}</strong>
+          <span>{{ item.created_at|replace('T', ' ') }}</span>
+          <p>{{ item.note }}</p>
+        </div>
+      {% else %}
+        <p class="muted">No activity yet.</p>
+      {% endfor %}
+    </div>
+    <div class="card">
+      <h2>Production integrations</h2>
+      <p class="muted" style="font-size:13.5px; margin-bottom:10px;">Connect these after you validate the offer:</p>
+      <ul style="font-size:14px; color:var(--muted); padding-left:18px; line-height:1.9;">
+        <li>Twilio — SMS &amp; missed-call text</li>
+        <li>Gmail/SendGrid — email</li>
+        <li>Google Calendar — scheduling</li>
+        <li>HubSpot/GoHighLevel — CRM sync</li>
+        <li>OpenAI — deeper qualification</li>
+      </ul>
+    </div>
+  </aside>
 </div>
 {% endblock %}
