@@ -1,11 +1,113 @@
-{% extends 'base.html' %}{% block content %}
-<div class="hero"><div><p class="eyebrow">LOCAL SERVICE BUSINESS AUTOMATION</p><h1>Every lead gets captured, qualified, and followed up.</h1><p class="muted">This demo turns a website inquiry into a scored CRM lead, response draft, and follow-up task automatically.</p></div><a class="button" href="{{ url_for('intake') }}">Test the lead form</a></div>
+{% extends 'base.html' %}
+{% block title %}{{ app_name }} Dashboard — {{ tagline }}{% endblock %}
+{% block content %}
+
+<div class="hero">
+  <div>
+    <p class="eyebrow">LeadWolf CRM</p>
+    <h1>Every lead gets captured, qualified, and followed up.</h1>
+    <p class="muted">A website inquiry becomes a scored lead, a response draft, and a follow-up task — automatically. Scores are transparent: you always see the math.</p>
+  </div>
+  <div class="hero-wolf">{% include '_wolf.html' %}</div>
+</div>
+
+<div style="margin-bottom:28px">
+  <a class="button" href="{{ url_for('intake') }}">+ New lead / test the form</a>
+</div>
+
 <div class="stats">
   <div class="card stat"><span>Total leads</span><strong>{{ stats.total }}</strong></div>
   <div class="card stat"><span>New</span><strong>{{ stats.new }}</strong></div>
-  <div class="card stat"><span>Hot</span><strong>{{ stats.hot }}</strong></div>
+  <div class="card stat hot"><span>Hot right now</span><strong>{{ stats.hot }}</strong></div>
   <div class="card stat"><span>Won</span><strong>{{ stats.won }}</strong></div>
 </div>
-{% if due %}<section><h2>Follow-ups due</h2><div class="card"><table><thead><tr><th>Lead</th><th>Service</th><th>Score</th><th>Due</th></tr></thead><tbody>{% for lead in due %}<tr><td><a href="{{ url_for('lead_detail', lead_id=lead.id) }}">{{ lead.name }}</a></td><td>{{ lead.service }}</td><td><span class="score {% if lead.score >= 80 %}hot{% endif %}">{{ lead.score }}</span></td><td>{{ lead.followup_at|replace('T',' ') }}</td></tr>{% endfor %}</tbody></table></div></section>{% endif %}
-<section><div class="section-head"><h2>Lead pipeline</h2><a href="{{ url_for('intake') }}">+ Add lead</a></div><div class="card table-wrap"><table><thead><tr><th>Lead</th><th>Service</th><th>Urgency</th><th>Score</th><th>Status</th><th>Source</th><th>Created</th></tr></thead><tbody>{% for lead in leads %}<tr><td><a href="{{ url_for('lead_detail', lead_id=lead.id) }}"><strong>{{ lead.name }}</strong></a><div class="tiny">{{ lead.phone or lead.email }}</div></td><td>{{ lead.service }}</td><td>{{ lead.urgency }}</td><td><span class="score {% if lead.score >= 80 %}hot{% elif lead.score >= 60 %}warm{% endif %}">{{ lead.score }}</span></td><td><span class="status">{{ lead.status }}</span></td><td>{{ lead.source }}</td><td class="tiny">{{ lead.created_at|replace('T',' ') }}</td></tr>{% else %}<tr><td colspan="7" class="empty">No leads yet. Submit the lead form to watch the automation work.</td></tr>{% endfor %}</tbody></table></div></section>
+
+{% if due %}
+<section>
+  <h2>Follow-ups due</h2>
+  <div class="card table-wrap">
+    <table>
+      <thead><tr><th>Lead</th><th>Service</th><th>Score</th><th>Due</th></tr></thead>
+      <tbody>
+      {% for lead in due %}
+        <tr>
+          <td><a href="{{ url_for('lead_detail', lead_id=lead.id) }}"><strong>{{ lead.name }}</strong></a></td>
+          <td>{{ lead.service }}</td>
+          <td><span class="score {% if lead.score >= 80 %}hot{% elif lead.score >= 60 %}warm{% endif %}">{{ lead.score }}</span></td>
+          <td class="tiny">{{ lead.followup_at|replace('T', ' ') }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+
+<section>
+  <div class="section-head">
+    <h2>Lead pipeline</h2>
+  </div>
+
+  <form method="get" action="{{ url_for('dashboard') }}" class="toolbar">
+    <div class="field">
+      <label>Search
+        <input type="search" name="q" value="{{ q }}" placeholder="Name, service, phone, email…">
+      </label>
+    </div>
+    <div class="field" style="max-width:220px">
+      <label>Status
+        <select name="status">
+          <option value="">All statuses</option>
+          {% for s in statuses %}
+          <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+    <div><button class="button secondary" type="submit">Filter</button></div>
+    {% if q or status_filter %}
+    <div><a class="button secondary" href="{{ url_for('dashboard') }}">Clear</a></div>
+    {% endif %}
+  </form>
+
+  <div class="card table-wrap">
+    <table>
+      <thead><tr>
+        <th>Lead</th><th>Service</th><th>Urgency</th><th>Score</th>
+        <th>Status</th><th>Source</th><th>Created</th><th></th>
+      </tr></thead>
+      <tbody>
+      {% for lead in leads %}
+        <tr>
+          <td>
+            <a href="{{ url_for('lead_detail', lead_id=lead.id) }}"><strong>{{ lead.name }}</strong></a>
+            <div class="tiny">{{ lead.phone or lead.email or '—' }}</div>
+          </td>
+          <td>{{ lead.service }}</td>
+          <td>{{ lead.urgency }}</td>
+          <td><span class="score {% if lead.score >= 80 %}hot{% elif lead.score >= 60 %}warm{% endif %}">{{ lead.score }}</span></td>
+          <td><span class="status s-{{ lead.status|lower|replace(' ', '') }}">{{ lead.status }}</span></td>
+          <td>{{ lead.source }}</td>
+          <td class="tiny">{{ lead.created_at|replace('T', ' ') }}</td>
+          <td>
+            <form method="post" action="{{ url_for('delete_lead', lead_id=lead.id) }}"
+                  onsubmit="return confirm('Delete {{ lead.name }}? This cannot be undone.');"
+                  class="inline-form">
+              <button class="button danger small" type="submit" title="Delete lead">Delete</button>
+            </form>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="8" class="empty">
+          {% if q or status_filter %}
+            No leads match this filter. <a href="{{ url_for('dashboard') }}">Clear filters</a>
+          {% else %}
+            No leads yet. Submit the lead form to watch the automation work.
+          {% endif %}
+        </td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
 {% endblock %}
